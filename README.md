@@ -1,4 +1,4 @@
-# PIRE
+# PIRE: PCAP Ingest Read & Evaluate
 
 **PCAP Ingest, Read & Evaluate**
 
