@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PIRE PCAP Ingest Read & Evaluate</title>
+    <link rel="icon" type="image/svg+xml" href="/static/pire-magnifier.svg" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260508e" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <img src="/static/pire-magnifier.svg" alt="PIRE logo" class="brand-icon" />
+          <div class="brand-text">PIRE PCAP Ingest Read &amp; Evaluate</div>
+        </div>
+        <div class="topbar-actions">
+          <label class="upload-button" for="pcap-upload">Upload PCAP</label>
+          <input id="pcap-upload" type="file" accept=".pcap,.pcapng,.cap,.zip" hidden />
+          <button class="menu-button" id="refresh-button">Refresh</button>
+        </div>
+      </header>
+
+      <div class="main-grid">
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-header">
+            <span>Captures</span>
+            <button id="sidebar-toggle" class="icon-button" aria-label="Collapse sidebar">❮</button>
+          </div>
+          <section class="meta-card">
+            <h3>Current Load</h3>
+            <div id="meta-summary" class="meta-list"></div>
+            <div class="meta-actions">
+              <button id="delete-case-button" class="ghost-button sidebar-tool-button hidden" type="button">Delete current case</button>
+            </div>
+          </section>
+          <section class="pcap-list-wrap">
+            <div class="section-label">Available PCAPs</div>
+            <div id="pcap-list" class="pcap-list"></div>
+          </section>
+          <section class="sidebar-tools">
+            <div class="section-label">Cleanup</div>
+            <div id="storage-summary" class="storage-summary"></div>
+            <div class="sidebar-tool-actions">
+              <button id="delete-exports-button" class="ghost-button sidebar-tool-button" type="button">Delete all exports</button>
+              <button id="prune-cache-button" class="ghost-button sidebar-tool-button" type="button">Prune orphan caches</button>
+            </div>
+          </section>
+        </aside>
+
+        <main class="workspace">
+          <section class="inspector-panel card">
+            <div class="panel-header compact">
+              <div>
+                <h2>Investigation Workspace</h2>
+                <p>Move between case summary, evidence, logs, and capture details without losing focus.</p>
+              </div>
+              <div class="tab-row" id="tab-row">
+                <button class="tab active" data-tab="summary">Summary</button>
+                <button class="tab" data-tab="evidence">Evidence</button>
+                <button class="tab" data-tab="logs">Logs</button>
+                <button class="tab" data-tab="knowledge">Knowledge</button>
+                <button class="tab" data-tab="capture-details">Capture Details</button>
+              </div>
+            </div>
+            <div class="tab-content-wrap">
+              <section class="tab-panel active" data-panel="summary">
+                <div id="summary-content" class="summary-view"></div>
+              </section>
+              <section class="tab-panel" data-panel="evidence">
+                <div class="subtab-row" id="evidence-subtab-row">
+                  <button class="subtab active" data-evidence-view="triage">Immediate Attention</button>
+                  <button class="subtab" data-evidence-view="timeline">Timeline</button>
+                  <button class="subtab" data-evidence-view="protocols">Protocols</button>
+                  <button class="subtab" data-evidence-view="conversations">Conversations</button>
+                  <button class="subtab" data-evidence-view="endpoints">Endpoints</button>
+                  <button class="subtab" data-evidence-view="hosts">Hosts</button>
+                </div>
+                <section class="subtab-panel active" data-evidence-panel="triage">
+                  <div id="triage-summary-content" class="triage-grid"></div>
+                </section>
+                <section class="subtab-panel" data-evidence-panel="timeline">
+                  <div id="timeline-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-evidence-panel="protocols">
+                  <pre id="protocols-content" class="content-pre"></pre>
+                </section>
+                <section class="subtab-panel" data-evidence-panel="conversations">
+                  <div id="conversations-content" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-evidence-panel="endpoints">
+                  <div id="endpoints-content" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-evidence-panel="hosts">
+                  <div id="hosts-content" class="table-wrap"></div>
+                </section>
+              </section>
+              <section class="tab-panel" data-panel="logs">
+                <div class="subtab-row" id="logs-subtab-row">
+                  <button class="subtab active" data-log-view="zeek-summary">Zeek Summary</button>
+                  <button class="subtab" data-log-view="zeek-conn">conn.log</button>
+                  <button class="subtab" data-log-view="zeek-dns">dns.log</button>
+                  <button class="subtab" data-log-view="zeek-http">http.log</button>
+                  <button class="subtab" data-log-view="zeek-files">files.log</button>
+                  <button class="subtab" data-log-view="zeek-ssl">ssl.log</button>
+                  <button class="subtab" data-log-view="zeek-x509">x509.log</button>
+                  <button class="subtab" data-log-view="zeek-smtp">smtp.log</button>
+                  <button class="subtab" data-log-view="zeek-smb-files">smb_files.log</button>
+                  <button class="subtab" data-log-view="zeek-smb-mapping">smb_mapping.log</button>
+                  <button class="subtab" data-log-view="zeek-dce-rpc">dce_rpc.log</button>
+                  <button class="subtab" data-log-view="zeek-notice">notice.log</button>
+                  <button class="subtab" data-log-view="zeek-weird">weird.log</button>
+                  <button class="subtab" data-log-view="zeek-viewer">Log Viewer</button>
+                </div>
+                <section class="subtab-panel active" data-log-panel="zeek-summary">
+                  <div id="zeek-summary-content" class="zeek-summary-grid"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-conn">
+                  <div id="zeek-conn-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-dns">
+                  <div id="zeek-dns-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-http">
+                  <div id="zeek-http-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-files">
+                  <div id="zeek-files-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-ssl">
+                  <div id="zeek-ssl-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-x509">
+                  <div id="zeek-x509-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-smtp">
+                  <div id="zeek-smtp-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-smb-files">
+                  <div id="zeek-smb-files-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-smb-mapping">
+                  <div id="zeek-smb-mapping-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-dce-rpc">
+                  <div id="zeek-dce-rpc-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-notice">
+                  <div id="zeek-notice-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-weird">
+                  <div id="zeek-weird-table" class="table-wrap"></div>
+                </section>
+                <section class="subtab-panel" data-log-panel="zeek-viewer">
+                  <div id="zeek-generic-table" class="table-wrap"></div>
+                </section>
+              </section>
+              <section class="tab-panel" data-panel="knowledge">
+                <div class="subtab-row" id="knowledge-subtab-row">
+                  <button class="subtab active" data-knowledge-view="queue">Queue</button>
+                  <button class="subtab" data-knowledge-view="tree">Saved Knowledge</button>
+                </div>
+                <section class="subtab-panel active" data-knowledge-panel="queue">
+                  <div id="knowledge-queue-content" class="knowledge-queue"></div>
+                </section>
+                <section class="subtab-panel" data-knowledge-panel="tree">
+                  <div class="knowledge-saved-layout">
+                    <div id="knowledge-tree-content" class="knowledge-tree-wrap"></div>
+                    <section id="knowledge-note-editor" class="knowledge-note-editor hidden">
+                      <div class="knowledge-note-header">
+                        <div>
+                          <div class="knowledge-kicker">Saved note</div>
+                          <h3 id="knowledge-note-title">No note selected</h3>
+                          <div id="knowledge-note-path" class="knowledge-note-path"></div>
+                        </div>
+                        <div class="knowledge-note-actions">
+                          <button id="knowledge-note-close" class="ghost-button" type="button">Close</button>
+                          <button id="knowledge-note-save" class="ghost-button" type="button" disabled>Save updates</button>
+                          <button id="knowledge-note-delete" class="ghost-button" type="button">Delete</button>
+                        </div>
+                      </div>
+                      <textarea id="knowledge-note-text" class="knowledge-note-text" spellcheck="false"></textarea>
+                    </section>
+                  </div>
+                </section>
+              </section>
+              <section class="tab-panel" data-panel="capture-details">
+                <div class="capture-details-grid">
+                  <section class="capture-detail-card">
+                    <div class="section-heading">
+                      <h3>Capinfos</h3>
+                      <p>Packet-level capture properties and timing.</p>
+                    </div>
+                    <pre id="capinfos-content" class="content-pre"></pre>
+                  </section>
+                  <section class="capture-detail-card">
+                    <div class="section-heading">
+                      <h3>Metadata</h3>
+                      <p>Raw ingest and parse metadata for the active case.</p>
+                    </div>
+                    <pre id="metadata-content" class="content-pre"></pre>
+                  </section>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="chat-panel card">
+            <div class="panel-header compact">
+              <div>
+                <h2>OpenClaw PIRE Mode</h2>
+                <p>Chat with OpenClaw here; use PIRE as the evidence and pivot workbench.</p>
+              </div>
+            </div>
+            <div class="activity-strip" id="activity-strip">
+              <div class="activity-strip-header">
+                <span class="activity-dot" id="activity-dot"></span>
+                <strong id="activity-title">Idle</strong>
+              </div>
+              <div class="activity-steps" id="activity-steps"></div>
+            </div>
+            <div class="chat-scroll" id="chat-scroll"></div>
+            <div id="chat-attachment-strip" class="chat-attachment-strip"></div>
+            <form class="chat-input-row" id="chat-form">
+              <input id="chat-input" type="text" placeholder="Ask OpenClaw about the loaded PCAP, or paste a screenshot..." />
+              <button type="submit" class="send-button">Send</button>
+            </form>
+            <div id="detail-content" class="detail-panel-content chat-knowledge-inline"></div>
+          </section>
+
+          <section class="theme-panel card" id="theme-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Themes</h2>
+                <p>Preview and save signature-style palettes for the PIRE workspace.</p>
+              </div>
+            </div>
+            <div class="theme-panel-body">
+              <div class="theme-toolbar">
+                <div>
+                  <label for="preset-select" class="theme-label">Theme preset</label>
+                  <select id="preset-select" class="theme-select"></select>
+                  <div class="preset-help">Pick a preset, preview it, then save it if you like it.</div>
+                  <div id="preset-swatches" class="swatch-row"></div>
+                </div>
+
+                <div class="theme-actions">
+                  <button class="ghost-button" id="apply-preset" type="button">Preview preset</button>
+                  <button class="ghost-button" id="save-theme" type="button">Save current theme</button>
+                  <button class="ghost-button" id="toggle-editor" type="button">Show manual colors</button>
+                </div>
+
+                <div id="palette-editor" class="palette-editor">
+                  <div class="palette-grid" id="palette-grid"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+
+      <footer class="statusbar">
+        <div id="status-left">Connected to local container</div>
+        <div class="status-dot"></div>
+        <div id="status-right">PCAP loaded: none</div>
+      </footer>
+    </div>
+
+    <script src="/static/app.js?v=20260508q"></script>
+  </body>
+</html>

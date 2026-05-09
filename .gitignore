@@ -1,0 +1,26 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+pire/incoming/*
+!pire/incoming/.gitkeep
+pire/output/*
+!pire/output/.gitkeep
+pire/exports/*
+!pire/exports/.gitkeep
+pire/cache/*
+!pire/cache/.gitkeep
+
+# local/runtime-only
+backups/
+library/cases/
+library/protocols/
+library/experience/
+library/tmp/
+pire/incoming/
+pire/output/
+pire/exports/
+pire/cache/
+.pytest_cache/
+.mypy_cache/
+.DS_Store

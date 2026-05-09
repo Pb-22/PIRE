@@ -1,0 +1,53 @@
+services:
+  pire:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pire-openclaw:dev
+    container_name: pire-openclaw
+    user: "1000:1000"
+    tty: true
+    stdin_open: true
+    working_dir: /app-host
+    volumes:
+      - ./pire:/data
+      - ./:/app-host
+    environment:
+      PATH: /opt/zeek/bin:/usr/local/bin:/usr/bin:/bin
+      PIRE_DATA_DIR: /data
+      PIRE_PROMPT_ON_START: "0"
+      PYTHONPATH: /app-host/src
+      PIRE_ZEEK_CACHE_DIR: /data/cache/zeek
+      PIRE_ZEEK_LOG_DIR: /data/cache/zeek/logs
+      PIRE_OPENCLAW_API_BASE: ${PIRE_OPENCLAW_API_BASE:-http://host.docker.internal:18789/v1}
+      PIRE_OPENCLAW_API_KEY: ${PIRE_OPENCLAW_API_KEY:-}
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
+      PIRE_OPENCLAW_MODEL: ${PIRE_OPENCLAW_MODEL:-openclaw/default}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["python", "-m", "pire.cli", "--help"]
+
+  pire-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pire-openclaw:dev
+    container_name: pire-ui
+    user: "1000:1000"
+    working_dir: /app-host
+    volumes:
+      - ./pire:/data
+      - ./:/app-host
+    environment:
+      PATH: /opt/zeek/bin:/usr/local/bin:/usr/bin:/bin
+      PIRE_DATA_DIR: /data
+      PIRE_PROMPT_ON_START: "0"
+      PYTHONPATH: /app-host/src
+      PIRE_ZEEK_CACHE_DIR: /data/cache/zeek
+      PIRE_ZEEK_LOG_DIR: /data/cache/zeek/logs
+      PIRE_OPENCLAW_API_BASE: ${PIRE_OPENCLAW_API_BASE:-http://127.0.0.1:18789/v1}
+      PIRE_OPENCLAW_API_KEY: ${PIRE_OPENCLAW_API_KEY:-}
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
+      PIRE_OPENCLAW_MODEL: ${PIRE_OPENCLAW_MODEL:-openclaw/default}
+    network_mode: host
+    command: ["python", "-m", "uvicorn", "pire.web:app", "--host", "127.0.0.1", "--port", "22000"]
