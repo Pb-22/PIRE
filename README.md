@@ -375,6 +375,8 @@ The sidebar handles:
 
 There is a direct **PCAP download** action beside each PCAP row.
 
+![PIRE sidebar showing current loaded PCAP and available captures](docs/screenshots/ui/sidebar/current-load.png)
+
 ### Investigation Workspace
 
 The middle panel is the main workbench.
@@ -391,6 +393,14 @@ Subtabs include:
 - Conversations
 - Endpoints
 - Hosts
+
+**Immediate Attention** gives you the highest-value leads first:
+
+![PIRE Evidence tab — Immediate Attention](docs/screenshots/ui/evidence/immediate-attention.png)
+
+**Timeline** helps you walk the case in event order and pivot into the underlying evidence:
+
+![PIRE Evidence tab — Timeline](docs/screenshots/ui/evidence/timeline.png)
 
 #### Logs
 This is the main Zeek / merged evidence area.
@@ -412,11 +422,25 @@ Current log surfaces include:
 - `weird.log`
 - generic log viewer
 
+Merged / fallback-aware log views are a core part of the workbench:
+
+![PIRE Logs tab — merged http.log view](docs/screenshots/ui/logs/http-merged.png)
+
+![PIRE Logs tab — merged files.log view](docs/screenshots/ui/logs/files-merged.png)
+
 #### Knowledge
 Subtabs:
 
 - Queue
 - Saved Knowledge
+
+The queue is for deliberate human review, not automatic clutter:
+
+![PIRE Knowledge tab — Queue](docs/screenshots/ui/knowledge/queue.png)
+
+Saved notes stay editable inside the UI:
+
+![PIRE Knowledge tab — Saved Knowledge editor](docs/screenshots/ui/knowledge/saved-knowledge-editor.png)
 
 #### Capture Details
 Low-level capture properties and metadata.
@@ -452,6 +476,8 @@ The log area now gives visible feedback when searching:
 - search button flash/highlight
 - small progress bar
 - progress text while the query runs
+
+![PIRE Logs tab — search feedback while filtering log rows](docs/screenshots/ui/logs/search-feedback.png)
 
 ### Ordering
 Merged rows now default to **first → last** in time order.
@@ -537,6 +563,20 @@ The queue is meant to surface a **small number** of things worth deliberate revi
 
 It should **not** become a generic “interestingness spam” bucket.
 
+### Library-first / saved-knowledge-first behavior
+When PIRE and OpenClaw are deciding what to do next, the intended order is:
+
+1. check the current case state
+2. check saved knowledge already in the library
+3. check reusable protocol / experiential knowledge
+4. only then consider asking for external/API-style lookup permission or broader browsing when local knowledge is not enough
+
+In other words:
+
+- **saved knowledge should be checked first**
+- external/API-style lookup should be a later step, not the default first reflex
+- the operator should not be prompted to browse or query outward if the answer is already present in the saved knowledge loop
+
 ### Promotion rules
 The intended distinction is:
 
@@ -569,6 +609,8 @@ It gets more useful because it can retain and reuse the right kinds of context:
 
 The point is not to save everything.
 The point is to preserve what proved useful in this environment.
+
+That matters operationally because the next investigation should start by reusing what is already known locally before asking the user to approve more browsing or external/API-style querying.
 
 ---
 
